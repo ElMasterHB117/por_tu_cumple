@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Un pequeño universo creado por David para celebrar el cumpleaños de Jenifer."
+    />
+    <meta name="theme-color" content="#080b22" />
+    <title>Un pequeño universo para Jenifer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#universo">Ir al universo</a>
+
+    <div class="sky" aria-hidden="true">
+      <div class="stars stars--small"></div>
+      <div class="stars stars--medium"></div>
+      <div class="nebula nebula--one"></div>
+      <div class="nebula nebula--two"></div>
+    </div>
+
+    <header class="topbar">
+      <p class="signature">Para Jenifer Balcon</p>
+      <button
+        class="sound-button"
+        id="soundButton"
+        type="button"
+        aria-pressed="true"
+        aria-describedby="soundHint"
+      >
+        <span class="sound-button__icon" aria-hidden="true">♪</span>
+        <span id="soundButtonLabel">Sonido activado</span>
+      </button>
+      <span class="sr-only" id="soundHint">
+        Activa o silencia los sonidos interactivos. No se reproduce nada automáticamente.
+      </span>
+    </header>
+
+    <main>
+      <section class="welcome" id="inicio" aria-labelledby="mainTitle">
+        <p class="eyebrow">10 · noviembre · 2026</p>
+        <h1 id="mainTitle">Un pequeño universo<br /><em>para Jenifer</em></h1>
+        <p class="welcome__copy">
+          Hay personas que hacen que el mundo se sienta más bonito. Este rincón
+          existe para recordarte que tú eres una de ellas.
+        </p>
+        <a class="enter-button" href="#universo">
+          Explorar el cielo
+          <span aria-hidden="true">↓</span>
+        </a>
+      </section>
+
+      <section class="universe" id="universo" aria-labelledby="universeTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Constelación de recuerdos</p>
+          <h2 id="universeTitle">Seis luces en el cielo</h2>
+          <p>
+            Toca cada estrella. Aquí, hasta la luz más pequeña guarda algo que
+            quería decirte.
+          </p>
+        </div>
+
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-copy">
+            <span id="progressLabel">0 de 6 estrellas descubiertas</span>
+            <button class="reset-button" id="resetButton" type="button" hidden>
+              Reiniciar recorrido
+            </button>
+          </div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="6"
+            aria-valuenow="0"
+            aria-labelledby="progressLabel"
+          >
+            <span id="progressBar"></span>
+          </div>
+        </div>
+
+        <div class="constellation" aria-label="Constelación interactiva">
+          <svg
+            class="constellation__lines"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="constellationGlow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#a98ee8" />
+                <stop offset="48%" stop-color="#f2dda9" />
+                <stop offset="100%" stop-color="#fff8e8" />
+              </linearGradient>
+            </defs>
+            <path class="constellation-line constellation-line--1" d="M13 30 C23 21 34 14 46 15" />
+            <path class="constellation-line constellation-line--2" d="M46 15 C62 12 78 25 87 39" />
+            <path class="constellation-line constellation-line--3" d="M87 39 C87 60 81 78 71 91" />
+            <path class="constellation-line constellation-line--4" d="M71 91 C56 98 38 98 24 91" />
+            <path class="constellation-line constellation-line--5" d="M24 91 C31 78 40 70 50 71" />
+            <path class="constellation-line constellation-line--6" d="M50 71 C34 64 22 49 13 30" />
+            <ellipse
+              class="constellation-orbit"
+              cx="50"
+              cy="53"
+              rx="12"
+              ry="7"
+              transform="rotate(-12 50 53)"
+            />
+          </svg>
+
+          <button class="magic-star magic-star--one" type="button" data-star="1">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz I</span>
+            <span class="sr-only">Descubrir la primera estrella</span>
+          </button>
+
+          <button class="magic-star magic-star--two" type="button" data-star="2">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz II</span>
+            <span class="sr-only">Descubrir la segunda estrella</span>
+          </button>
+
+          <button class="magic-star magic-star--three" type="button" data-star="3">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz III</span>
+            <span class="sr-only">Descubrir la tercera estrella</span>
+          </button>
+
+          <button class="magic-star magic-star--four" type="button" data-star="4">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz IV</span>
+            <span class="sr-only">Descubrir la cuarta estrella</span>
+          </button>
+
+          <button class="magic-star magic-star--five" type="button" data-star="5">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz V</span>
+            <span class="sr-only">Descubrir la quinta estrella</span>
+          </button>
+
+          <button class="magic-star magic-star--six" type="button" data-star="6">
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">Luz VI</span>
+            <span class="sr-only">Descubrir la sexta estrella</span>
+          </button>
+
+          <button
+            class="magic-star magic-star--seven is-secret"
+            id="seventhStar"
+            type="button"
+            aria-label="Descubrir la séptima estrella"
+            hidden
+          >
+            <span class="magic-star__shape" aria-hidden="true">✦</span>
+            <span class="magic-star__label">La última luz</span>
+          </button>
+        </div>
+
+        <p class="stage-note" id="stageNote">
+          Las seis luces están disponibles · Descúbrelas en el orden que quieras.
+        </p>
+      </section>
+
+      <section class="closing" id="closing" aria-labelledby="closingTitle">
+        <p class="eyebrow">Un último secreto</p>
+        <h2 id="closingTitle">Hay palabras esperando detrás de las estrellas</h2>
+        <p id="closingCopy">
+          Completa la constelación y encuentra la luz que no aparece en ningún mapa.
+        </p>
+        <button class="letter-button" id="letterButton" type="button" hidden>
+          <span aria-hidden="true">✉</span>
+          <span id="letterButtonLabel">Abrir la carta final</span>
+        </button>
+      </section>
+    </main>
+
+    <footer>
+      <p>Hecho con cariño por David <span aria-hidden="true">·</span> 2026</p>
+    </footer>
+
+    <dialog class="message-dialog" id="messageDialog" aria-labelledby="dialogTitle">
+      <div class="message-card">
+        <button class="dialog-close" id="dialogClose" type="button" aria-label="Cerrar mensaje">
+          ×
+        </button>
+        <span class="message-card__star" aria-hidden="true">✦</span>
+        <figure class="message-card__photo" id="dialogPhotoFrame" hidden>
+          <span class="photo-orbit" aria-hidden="true"></span>
+          <span class="photo-viewport">
+            <img id="dialogPhoto" alt="" decoding="async" />
+          </span>
+        </figure>
+        <p class="eyebrow" id="dialogKicker">Primera luz</p>
+        <h2 id="dialogTitle">Una forma de iluminar</h2>
+        <p id="dialogMessage"></p>
+        <button class="dialog-continue" id="dialogContinue" type="button">
+          Volver al cielo
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="letter-dialog" id="letterDialog" aria-labelledby="letterTitle">
+      <article class="letter-card">
+        <button
+          class="dialog-close"
+          id="letterClose"
+          type="button"
+          aria-label="Cerrar la carta"
+        >
+          ×
+        </button>
+        <p class="eyebrow">Para Jenifer, en tu cumpleaños</p>
+        <h2 id="letterTitle">La luz más importante</h2>
+        <figure class="letter-photo" id="letterPhotoFrame" hidden>
+          <span class="photo-orbit" aria-hidden="true"></span>
+          <span class="photo-viewport">
+            <img id="letterPhoto" alt="" decoding="async" />
+          </span>
+        </figure>
+        <div class="letter-copy">
+          <p>Jenifer:</p>
+          <p>
+            Quise construirte este pequeño universo porque algunas personas merecen
+            un lugar especial, incluso entre las estrellas.
+          </p>
+          <p>
+            Cada luz guarda algo que admiro, recuerdo o deseo para ti. Pero ninguna
+            constelación podría decir por completo lo valiosa que es tu presencia ni
+            toda la alegría que espero que encuentre tu camino.
+          </p>
+          <p>
+            Que este nuevo año te regale calma para disfrutar lo sencillo, valentía
+            para perseguir lo que sueñas y muchos motivos para sonreír de verdad.
+          </p>
+          <p>Feliz cumpleaños, Jenifer.</p>
+          <p class="letter-signature">Con cariño,<br /><strong>David</strong></p>
+        </div>
+      </article>
+    </dialog>
+
+    <div class="shooting-star" id="shootingStar" aria-hidden="true">
+      <span></span>
+    </div>
+    <div class="announcement sr-only" id="announcement" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
