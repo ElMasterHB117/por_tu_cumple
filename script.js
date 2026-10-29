@@ -563,10 +563,11 @@ function initializeAmbientShootingStars() {
   if (!sky) return;
 
   let ambientTimer = null;
+  const mobileProfile = window.matchMedia("(pointer: coarse), (max-width: 699px)").matches;
 
   const scheduleNext = (first = false) => {
-    const minimum = first ? 5500 : 10000;
-    const variation = first ? 5000 : 11000;
+    const minimum = mobileProfile ? (first ? 8000 : 18000) : (first ? 5500 : 10000);
+    const variation = mobileProfile ? (first ? 5000 : 14000) : (first ? 5000 : 11000);
     ambientTimer = window.setTimeout(spawnStar, minimum + Math.random() * variation);
   };
 
