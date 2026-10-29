@@ -68,16 +68,36 @@ const soundButtonLabel = document.querySelector("#soundButtonLabel");
 const constellation = document.querySelector(".constellation");
 const starButtons = [...document.querySelectorAll("[data-star]")];
 let activeStarId = null;
-let pendingFinalReveal = false;
 
 function readProgress() {
-  const emptyState = { discovered: [], shootingStarSeen: false, finalStarDiscovered: false, letterOpened: false, soundEnabled: true };
+  const emptyState = {
+    discovered: [],
+    unlockedThrough: 1,
+    sequenceCompleted: false,
+    shootingStarSeen: false,
+    finalStarDiscovered: false,
+    letterOpened: false,
+    soundEnabled: true,
+  };
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (Array.isArray(parsed)) return { ...emptyState, discovered: sanitizeStars(parsed) };
+    if (Array.isArray(parsed)) {
+      const discovered = sanitizeStars(parsed);
+      return {
+        ...emptyState,
+        discovered,
+        unlockedThrough: migratedUnlockedThrough(discovered),
+        sequenceCompleted: discovered.length === TOTAL_STARS,
+      };
+    }
     if (!parsed || !Array.isArray(parsed.discovered)) return emptyState;
     return {
       discovered: sanitizeStars(parsed.discovered),
+      unlockedThrough: sanitizeUnlockedThrough(parsed.unlockedThrough, parsed.discovered),
+      sequenceCompleted:
+        typeof parsed.sequenceCompleted === "boolean"
+          ? parsed.sequenceCompleted
+          : sanitizeStars(parsed.discovered).length === TOTAL_STARS,
       shootingStarSeen: Boolean(parsed.shootingStarSeen),
       finalStarDiscovered: Boolean(parsed.finalStarDiscovered),
       letterOpened: Boolean(parsed.letterOpened),
@@ -90,6 +110,16 @@ function readProgress() {
 
 function sanitizeStars(stars) {
   return [...new Set(stars)].filter((id) => Number.isInteger(id) && id >= 1 && id <= TOTAL_STARS);
+}
+
+function migratedUnlockedThrough(stars) {
+  if (stars.length === TOTAL_STARS) return TOTAL_STARS;
+  return Math.min(TOTAL_STARS, Math.max(1, ...stars.map((id) => id + 1)));
+}
+
+function sanitizeUnlockedThrough(value, stars) {
+  if (Number.isInteger(value) && value >= 1 && value <= TOTAL_STARS) return value;
+  return migratedUnlockedThrough(sanitizeStars(stars));
 }
 
 function saveProgress() {
@@ -194,29 +224,39 @@ function updateSoundButton() {
 function updateInterface() {
   const count = state.discovered.length;
   const complete = count === TOTAL_STARS;
+  const constellationReady = complete && state.sequenceCompleted;
+  const visiblePathCount = constellationReady ? TOTAL_STARS : Math.max(0, state.unlockedThrough - 1);
   progressLabel.textContent = `${count} de ${TOTAL_STARS} estrellas descubiertas`;
   progressTrack.setAttribute("aria-valuenow", String(count));
   progressBar.style.width = `${(count / TOTAL_STARS) * 100}%`;
-  constellation.dataset.progress = String(count);
+  constellation.dataset.progress = String(visiblePathCount);
   resetButton.hidden = count === 0 && !state.finalStarDiscovered;
 
   starButtons.forEach((button) => {
     const id = Number(button.dataset.star);
     const discovered = state.discovered.includes(id);
+    const unlocked = id <= state.unlockedThrough;
+    button.hidden = !unlocked;
     button.classList.toggle("is-discovered", discovered);
     button.setAttribute("aria-pressed", String(discovered));
   });
 
-  seventhStar.hidden = !complete || pendingFinalReveal;
-  seventhStar.classList.toggle("is-revealed", complete);
+  seventhStar.hidden = !constellationReady;
+  seventhStar.classList.toggle("is-revealed", constellationReady);
   seventhStar.classList.toggle("is-discovered", state.finalStarDiscovered);
   seventhStar.setAttribute("aria-pressed", String(state.finalStarDiscovered));
   letterButton.hidden = !state.finalStarDiscovered;
   letterButtonLabel.textContent = state.letterOpened ? "Volver a leer la carta" : "Abrir la carta final";
 
-  if (!complete) {
-    stageNote.textContent = "Las seis luces están disponibles · Descúbrelas en el orden que quieras.";
+  if (!complete && count === 0) {
+    stageNote.textContent = "Solo una luz ha aparecido · Descúbrela para comenzar el recorrido.";
     closingCopy.textContent = "Completa la constelación y encuentra la luz que no aparece en ningún mapa.";
+  } else if (!complete) {
+    stageNote.textContent = `El camino continúa · La Luz ${toRoman(state.unlockedThrough)} espera por ti.`;
+    closingCopy.textContent = "Completa la constelación y encuentra la luz que no aparece en ningún mapa.";
+  } else if (!state.sequenceCompleted) {
+    stageNote.textContent = "La sexta luz guarda el último tramo · Ciérrala para completar la constelación.";
+    closingCopy.textContent = "El último camino aparecerá cuando regreses al cielo.";
   } else if (!state.finalStarDiscovered) {
     stageNote.textContent = "Constelación completa · Ha aparecido una séptima luz.";
     closingCopy.textContent = "La última estrella ya está esperando en la constelación.";
@@ -225,6 +265,10 @@ function updateInterface() {
     closingCopy.textContent = state.letterOpened ? "Esta carta seguirá aquí siempre que quieras volver a leerla." : "La séptima estrella ha revelado una carta para ti.";
   }
   updateSoundButton();
+}
+
+function toRoman(id) {
+  return ["I", "II", "III", "IV", "V", "VI"][id - 1] || String(id);
 }
 
 function fillMessage(id) {
@@ -310,6 +354,7 @@ function initializePhotoParallax() {
 function openStar(id) {
   if (!starMessages[id]) return;
   const activeButton = starButtons.find((button) => Number(button.dataset.star) === id);
+  if (!activeButton || activeButton.hidden || id > state.unlockedThrough) return;
   const isNew = !state.discovered.includes(id);
   let reachedHalfway = false;
   let completedConstellation = false;
@@ -319,7 +364,6 @@ function openStar(id) {
     state.discovered.sort((a, b) => a - b);
     reachedHalfway = state.discovered.length === 3 && !state.shootingStarSeen;
     completedConstellation = state.discovered.length === TOTAL_STARS;
-    if (completedConstellation) pendingFinalReveal = true;
     if (reachedHalfway) {
       state.shootingStarSeen = true;
       triggerShootingStar();
@@ -350,7 +394,7 @@ function openStar(id) {
 }
 
 function openSeventhStar() {
-  if (state.discovered.length !== TOTAL_STARS) return;
+  if (state.discovered.length !== TOTAL_STARS || !state.sequenceCompleted) return;
   if (!state.finalStarDiscovered) {
     state.finalStarDiscovered = true;
     saveProgress();
@@ -371,11 +415,25 @@ function openSeventhStar() {
 
 function closeMessageDialog() {
   const shouldRevealLetter = activeStarId === 7;
-  const shouldRevealFinalStar = activeStarId === 6 && pendingFinalReveal;
+  const shouldRevealFinalStar =
+    activeStarId === 6 && state.discovered.includes(6) && !state.sequenceCompleted;
+  const nextStarId = activeStarId && activeStarId < TOTAL_STARS && state.discovered.includes(activeStarId)
+    ? activeStarId + 1
+    : null;
   dialog.close();
   activeStarId = null;
+  if (nextStarId && nextStarId > state.unlockedThrough) {
+    state.unlockedThrough = nextStarId;
+    saveProgress();
+    updateInterface();
+    const nextButton = starButtons.find((button) => Number(button.dataset.star) === nextStarId);
+    nextButton?.classList.add("just-unlocked");
+    setTimeout(() => nextButton?.classList.remove("just-unlocked"), 1350);
+    announcement.textContent = `El camino se ha extendido. La estrella ${nextStarId} acaba de aparecer.`;
+  }
   if (shouldRevealFinalStar) {
-    pendingFinalReveal = false;
+    state.sequenceCompleted = true;
+    saveProgress();
     updateInterface();
     constellation.classList.add("is-completing");
     setTimeout(() => constellation.classList.remove("is-completing"), 2720);
@@ -407,10 +465,11 @@ function triggerShootingStar() {
 
 function resetProgress() {
   state.discovered = [];
+  state.unlockedThrough = 1;
+  state.sequenceCompleted = false;
   state.shootingStarSeen = false;
   state.finalStarDiscovered = false;
   state.letterOpened = false;
-  pendingFinalReveal = false;
   saveProgress();
   shootingStar.classList.remove("is-active");
   updateInterface();
@@ -549,6 +608,10 @@ soundButton.addEventListener("click", toggleSound);
 dialogClose.addEventListener("click", closeMessageDialog);
 dialogContinue.addEventListener("click", closeMessageDialog);
 dialog.addEventListener("click", (event) => { if (event.target === dialog) closeMessageDialog(); });
+dialog.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  closeMessageDialog();
+});
 letterButton.addEventListener("click", openLetter);
 letterClose.addEventListener("click", closeLetter);
 letterDialog.addEventListener("click", (event) => { if (event.target === letterDialog) closeLetter(); });
